@@ -7,6 +7,7 @@ const EventAdvancedWebWrapper = ({ ...props }: EventAdvancedBaseProps) => {
   const { data: verifiedEmails } = trpc.viewer.workflows.getVerifiedEmails.useQuery({
     teamId: props.team?.id,
   });
+
   return (
     <EventAdvancedTab
       {...props}

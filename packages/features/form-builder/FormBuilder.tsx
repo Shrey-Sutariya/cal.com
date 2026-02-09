@@ -100,6 +100,7 @@ export const FormBuilder = function FormBuilder({
 }) {
   // I would have liked to give Form Builder it's own Form but nested Forms aren't something that browsers support.
   // So, this would reuse the same Form as the parent form.
+
   const fieldsForm = useFormContext<RhfForm>();
   const [parent] = useAutoAnimate<HTMLUListElement>();
   const { t } = useLocale();
@@ -257,6 +258,7 @@ export const FormBuilder = function FormBuilder({
               groupBy[source.label] = item;
               return groupBy;
             }, {} as Record<string, NonNullable<(typeof field)["sources"]>>);
+            console.log("field", field);
 
             return (
               <li
@@ -804,6 +806,7 @@ function FieldLabel({ field }: { field: RhfFormField }) {
   const variantsConfig = field.variantsConfig;
   const variantsConfigVariants = variantsConfig?.variants;
   const defaultVariant = fieldTypeConfigVariantsConfig?.defaultVariant;
+
   if (!fieldTypeConfigVariants || !variantsConfig) {
     if (fieldsThatSupportLabelAsSafeHtml.includes(field.type)) {
       return (
@@ -825,8 +828,8 @@ function FieldLabel({ field }: { field: RhfFormField }) {
       `Field has \`variantsConfig\` but no \`defaultVariant\`${JSON.stringify(fieldTypeConfigVariantsConfig)}`
     );
   }
-  const label =
-    variantsConfigVariants?.[variant as keyof typeof fieldTypeConfigVariants]?.fields?.[0]?.label || "";
+  const label = field.defaultLabel || "";
+
   return <span>{t(label)}</span>;
 }
 
@@ -922,12 +925,17 @@ function VariantFields({
               {!isSimpleVariant && (
                 <Label className="flex justify-between">
                   <span>{`Field ${index + 1}`}</span>
-                  <span className="text-muted">{f.name}</span>
+                  <span className="text-muted">
+                    {f.name
+                      .replace(/([A-Z])/g, " $1")
+                      .replace(/^./, (str) => str.toUpperCase())
+                      .trim()}
+                  </span>
                 </Label>
               )}
               <InputField
                 {...fieldForm.register(`${rhfVariantFieldPrefix}.label`)}
-                value={f.label || ""}
+                value={f.label ? (f.label.includes("_") ? t(f.label) : f.label) : ""}
                 placeholder={t(appUiFieldConfig?.defaultLabel || "")}
                 containerClassName="mt-6"
                 label={t("label")}
